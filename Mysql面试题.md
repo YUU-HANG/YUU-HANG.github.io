@@ -1,5 +1,5 @@
 # Mysql面试题
-[toc]
+
 ## 一 Mysql索引
 
 
@@ -22,7 +22,8 @@ MySQL中索引分三类：B+树索引、Hash索引、全文索引
   - MyISAM的回表操作是十分快速的，因为是拿着地址偏移量直接到文件中取数据的，反观InnoDB是通过获取主键之后再去聚簇索引里找记录，虽然说也不慢，但还是比不上直接用地址去访问。
   - InnoDB要求表必须有主键 （ MyISAM可以没有 ）。如果没有显式指定，则MySQL系统会自动选择一个可以非空且唯一标识数据记录的列作为主键。如果不存在这种列，则MySQL自动为InnoDB表生成一个隐含字段作为主键，这个字段长度为6个字节，类型为长整型。
 
-  ![image-20220709183820796](image-20220709183820796.png)
+ 
+![image-20220709183820796](https://user-images.githubusercontent.com/69784547/205269854-28b85487-c300-494c-9f8a-3236de08046d.png)
 
   
 
@@ -54,7 +55,7 @@ CREATE TABLE index_demo(c1 INT,c2 INT,c3 CHAR(1),PRIMARY KEY(c1)) ;
 
 index_demo表的简化的行格式示意图如下：
 
-![image-20220709071051043](image-20220709071051043.png)
+![image-20220709071051043](https://user-images.githubusercontent.com/69784547/205270255-fb06b1c5-282d-412e-8510-ef00ed10d75c.png)
 
 
 
@@ -69,14 +70,12 @@ index_demo表的简化的行格式示意图如下：
 
 将`其他信息`项暂时去掉并把它竖起来的效果就是这样：
 
-![image-20220709071958145](image-20220709071958145.png)
+![image-20220709071958145](https://user-images.githubusercontent.com/69784547/205271511-9089d9e5-576a-4ea1-9e91-cc92d3e2bdd1.png)
 
 
 
 把一些记录放到页里的示意图就是（这里一页就是一个磁盘块，代表一次IO）：
-
-![image-20220709072138395](image-20220709072138395.png)
-
+![image-20220709072138395](https://user-images.githubusercontent.com/69784547/205271585-7240a881-8e17-48ac-80e7-9d621921204e.png)
 name age sex
 
 
@@ -86,7 +85,7 @@ name age sex
 - 下一个数据页中用户记录的主键值必须大于上一个页中用户记录的主键值
 - 给所有的页建立目录项
 
-![image-20220709073749310](image-20220709073749310.png)
+![image-20220709073749310](https://user-images.githubusercontent.com/69784547/205271647-c91b74c3-76e6-4abd-b2b3-a8bc1287010c.png)
 
 以`页28`为例，它对应`目录项2` ，这个目录项中包含着该页的`页号28`以及该页中用户记录的`最小主键值 5`。我们只需要把几个目录项在物理存储器上连续存储（比如：数组），就可以实现根据主键值快速查找某条记录的功能了。`比如：查找主键值为 20 的记录，具体查找过程分两步：`
 
@@ -101,9 +100,9 @@ name age sex
 
 我们新分配一个编号为30的页来专门存储`目录项记录`，页10、28、9、20专门存储`用户记录`： 
 
-![image-20220709073749310](image-20220709074801215.png)
+![image-20220709074801215](https://user-images.githubusercontent.com/69784547/205271707-9d8c25f4-0618-4d98-9e93-7b609159e12f.png)
+![1557565-20220429110413866-1755798300](https://user-images.githubusercontent.com/69784547/205271759-d8922fdb-0dd3-4302-97ab-407622ca9a0b.png)
 
-![img](1557565-20220429110413866-1755798300.png)
 
 `目录项记录和普通的用户记录的不同点：` 
 
@@ -121,7 +120,7 @@ name age sex
 
 我们生成了一个存储更高级目录项的 页33 ，这个页中的两条记录分别代表页30和页32，如果用户记录的主键值在 `[1, 320)` 之间，则到页30中查找更详细的目录项记录，如果主键值 不小于320 的话，就到页32中查找更详细的目录项记录。**这个数据结构，它的名称是 B+树 。** 
 
-![image-20220709080648851](image-20220709080648851.png)
+![image-20220709080648851](https://user-images.githubusercontent.com/69784547/205271840-c6353167-7eb6-4a7f-a61b-ee458dae891b.png)
 
 #### 005	聚簇索引与非聚簇索引b+树实现有什么区别？
 
@@ -166,7 +165,7 @@ name age sex
 
 **例如，**`以c2列作为搜索条件`，那么需要使`用c2列创建一棵B+树`，如下所示：
 
-![image-20220709130937991](image-20220709130937991.png)
+![image-20220709130937991](https://user-images.githubusercontent.com/69784547/205271933-fdb4c6a9-dd81-47af-b2bb-b0b82565106f.png)
 
 
 
@@ -185,12 +184,11 @@ name age sex
 
 
 **一张表可以有多个非聚簇索引：**
-
-![image-20220709134109900](image-20220709134109900-16668534893372.png)
+![image-20220709134109900-16668534893372](https://user-images.githubusercontent.com/69784547/205272155-e8183954-035f-4bba-92d9-bd251d8518e4.png)
 
 #### 006	说一下B+树中聚簇索引的查找（匹配）逻辑
 
-![image-20220709080648851](image-20220709080648851.png)
+![image-20220709080648851](https://user-images.githubusercontent.com/69784547/205272226-13640785-43fb-4cc0-b0cc-e3a71ae438bb.png)
 
 #### 007	说一下B+树中非聚簇索引的查找（匹配）逻辑
 
@@ -202,7 +200,7 @@ name age sex
 4. 但是这个B+树的叶子节点`只存储了c2和c1（主键）`两个列，所以我们必须`再根据主键值去聚簇索引中再查找`一遍完整的用户记录。
 5. like 张%
 
-![image-20220709130937991](image-20220709130937991.png)
+![image-20220709130937991](https://user-images.githubusercontent.com/69784547/205272275-d8c0c3eb-53e5-4737-9436-ac0202397ca3.png)
 
 #### 008	平衡二叉树，红黑树，B树和B+树的区别是什么？都有哪些应用场景？
 
@@ -224,7 +222,7 @@ AVL树全称G.M. Adelson-Velsky和E.M. Landis，这是两个人的人名。
 - 它是一棵空树或它的左右两个子树的高度差的绝对值不超过1
 - 并且左右两个子树都是一棵平衡二叉树。
 
-![image-20220708235509010](image-20220708235509010.png)
+![image-20220708235509010](https://user-images.githubusercontent.com/69784547/205272323-12dec380-f893-4fcc-adda-16a754f874bb.png)
 
 AVL的生成演示：https://www.cs.usfca.edu/~galles/visualization/AVLtree.html
 
@@ -234,11 +232,11 @@ AVL的生成演示：https://www.cs.usfca.edu/~galles/visualization/AVLtree.html
 
 众所周知，IO操作的效率很低，在大量数据存储中，查询时我们不能一下子将所有数据加载到内存中，只能逐节点加载（一个节点一次IO）。如果我们利用二叉树作为索引结构，`那么磁盘的IO次数和索引树的高度是相关的`。平衡二叉树由于树深度过大而造成磁盘IO读写过于频繁，进而导致效率低下。
 
-![image-20220708233351509](image-20220708233351509.png)
+![image-20220708233351509](https://user-images.githubusercontent.com/69784547/205272370-8e162047-fde8-452d-af6b-e9fb0b4db098.png)
 
 为了提高查询效率，就需要 减少磁盘IO数 。`为了减少磁盘IO的次数，就需要尽量降低树的高度` ，需要把原来“瘦高”的树结构变的“矮胖”，树的每层的分叉越多越好。针对同样的数据，如果我们把二叉树改成 三叉树：
 
-![image-20220708235725124](image-20220708235725124.png)
+![image-20220708235725124](https://user-images.githubusercontent.com/69784547/205272420-6954c815-dcf2-42e7-a962-6f3dc0823755.png)
 
 上面的例子中，我们将二叉树变成了三叉树，降低了树的高度。如果能够在一个节点中存放更多的数据，我们还可以进一步减少节点的数量，从而进一步降低树的高度。这就是`多叉树`。
 
@@ -247,7 +245,7 @@ AVL的生成演示：https://www.cs.usfca.edu/~galles/visualization/AVLtree.html
 - 左子树全部为空，从形式上看，更像一个单链表，不能发挥BST的优势。
 - `解决方案：平衡二叉树(AVL)` 
 
-![image-20220708231622916](image-20220708231622916.png)
+![image-20220708231622916](https://user-images.githubusercontent.com/69784547/205272470-82cd73fe-0ff4-4b5f-ab85-bdad06ab5216.png)
 
 红黑树
 
@@ -256,12 +254,12 @@ AVL的生成演示：https://www.cs.usfca.edu/~galles/visualization/AVLtree.html
 - 分为红黑节点
 
 在这个棵严格的平台树上又进化为“红黑树”{是一个非严格的平衡树 左子树与右子树的高度差不能超过1}，红黑树的长子树只要不超过短子树的两倍即可！
-
+![image-20221027154142690](https://user-images.githubusercontent.com/69784547/205272514-2977b68b-fd87-48e6-976e-3e6f91448d95.png)
 ![image-20221027154142690](image-20221027154142690.png)
 
 当再次插入7的时候，这棵树就会发生旋转
 
-![image-20221027154120483](image-20221027154120483.png)
+![image-20221027154120483](https://user-images.githubusercontent.com/69784547/205272557-ea18b97a-b93f-4f33-af1a-639e602cdd63.png)
 
 
 
@@ -316,8 +314,7 @@ SHOW ENGINE INNODB STATUS \G ;
 **2-3树**
 
 下面2-3树就是一颗多叉树
-
-![image-20220709002223882](image-20220709002223882.png)
+![image-20220709002223882](https://user-images.githubusercontent.com/69784547/205272603-75e20105-e851-4197-a788-3ddcde2c8bfe.png)
 
 2-3树具有如下特点：
 
@@ -327,13 +324,12 @@ SHOW ENGINE INNODB STATUS \G ;
 - 2-3树是由二节点和三节点构成的树。
 - 对于三节点的子树的值大小仍然遵守 BST 二叉排序树的规则。
 
-![image-20220709002554341](image-20220709002554341.png)
+![image-20220709002554341](https://user-images.githubusercontent.com/69784547/205272638-10588ae7-9458-4375-94b3-b6a4896bf2c4.png)
 
 
 
 **2-3-4树**
-
-![image-20220709004531952](image-20220709004531952.png)
+![image-20220709004531952](https://user-images.githubusercontent.com/69784547/205272673-9be04f82-3cd7-4edf-8175-d346053fbcca.png)
 
 
 
@@ -492,7 +488,7 @@ where c3=?
 
 最左前缀
 
-![image-20220712002627554](image-20220712002627554.png)
+![image-20220712002627554](https://user-images.githubusercontent.com/69784547/205272754-97fca00d-365a-42e4-87a2-62c372783bb1.png)
 
 
 
@@ -894,9 +890,9 @@ EXPLAIN SELECT * FROM emp WHERE emp.name IS NOT NULL
 
 ## 二 MySQL 内部技术架构
 
-![image-20221028155608009](image-20221028155608009.png)
+![image-20221028155608009](https://user-images.githubusercontent.com/69784547/205272825-b277ab43-cfbe-44fa-8ed8-96166b689278.png)
 
-### ![img](29f7e85dea17e100b38b450d9949a330.png)047 Mysql内部支持缓存查询吗？
+### ![29f7e85dea17e100b38b450d9949a330](https://user-images.githubusercontent.com/69784547/205272900-6951e19c-7c4b-4a0e-b65d-74f601d4e88b.png)047 Mysql内部支持缓存查询吗？
 
 当MySQL接收到客户端的查询SQL之后，仅仅只需要对其进行相应的权限验证之后，就会通过Query Cache来查找结果，甚至都不需要经过Optimizer模块进行执行计划的分析优化，更不需要发生任何存储引擎的交互
 
@@ -925,7 +921,7 @@ mysql缓存的限制
 
 ### 050 Mysql内部有哪些核心模块组成，作用是什么？
 
-![image-20220627113443003](image-20220627113443003.png)
+![image-20220627113443003](https://user-images.githubusercontent.com/69784547/205272958-5396753a-aa59-42d7-915d-7b3eb5a9a4bd.png)
 
 
 
@@ -975,7 +971,7 @@ MySQL服务器之外的客户端程序，与具体的语言相关，例如Java�
 
 - 典型的解析树如下：
 
-![image-20220702002430362](image-20220702002430362.png)
+![image-20220702002430362](https://user-images.githubusercontent.com/69784547/205273003-bc3a79bd-a630-4f43-a12d-5c8cd689747b.png)
 
 
 
@@ -1015,7 +1011,7 @@ MySQL服务器之外的客户端程序，与具体的语言相关，例如Java�
 
 1.5、查询流程说明
 
-![image-20220627141453944](执行流程.png)
+![执行流程](https://user-images.githubusercontent.com/69784547/205273169-786a1d37-c4e1-4565-a265-2136a84e3748.png)
 
 **首先，**`MySQL客户端通过协议与MySQL服务器建连接，通过SQL接口发送SQL语句，先检查查询缓存，如果命中，直接返回结果，否则进行语句解析。`也就是说，在解析查询之前，服务器会先访问查询缓存，如果某个查询结果已经位于缓存中，服务器就不会再对查询进行解析、优化、以及执行。它仅仅将缓存中的结果返回给用户即可，这将大大提高系统的性能。
 
@@ -1050,8 +1046,7 @@ SHOW ENGINES;
 ```
 
 下面的结果表示MySQL中默认使用的存储引擎是InnoDB，支持事务，行锁，外键，支持分布式事务(XA)，支持保存点(回滚)
-
-![image-20220703164220030](image-20220703164220030.png)
+![image-20220703164220030](https://user-images.githubusercontent.com/69784547/205273230-07af9c8d-a187-417f-be0e-0b0b6cdab2c6.png)
 
 
 
@@ -1061,7 +1056,7 @@ SHOW ENGINES;
 SHOW VARIABLES LIKE '%default_storage_engine%';
 ```
 
-![image-20220703170334348](image-20220703170334348.png)
+![image-20220703170334348](https://user-images.githubusercontent.com/69784547/205273276-5fac14c4-0a94-4a6c-96d8-d7e9f57ac04b.png)
 
 
 
@@ -1148,7 +1143,7 @@ https://dev.mysql.com/doc/refman/5.7/en/innodb-architecture.html
 
 下面是官方的InnoDB引擎结构图，主要分为内存结构和磁盘结构两大部分。
 
-![img](16701032-f8547d110ba34135.png)
+![16701032-f8547d110ba34135](https://user-images.githubusercontent.com/69784547/205273324-98f33cd8-229a-46ed-939d-460b4b209e6e.png)
 
 
 
@@ -1502,7 +1497,7 @@ MVCC 的实现依赖于：隐藏字段、Read View、undo log
 
 https://dev.mysql.com/doc/refman/8.0/en/xa.html
 
-![在这里插入图片描述](2021110810071449.png)
+![2021110810071449](https://user-images.githubusercontent.com/69784547/205273457-2157da20-7af1-4e9b-8d72-f1c0e208a47d.png)
 
 - AP（Application Program）：应用程序，定义事务边界（定义事务开始和结束）并访问事务边界内的资源。
 - RM（Resource Manger）资源管理器: 管理共享资源并提供外部访问接口。供外部程序来访问数据库等共享资源。此外，RM还具有事务的回滚能力。
@@ -1737,7 +1732,7 @@ binlog 写入策略：
 
 
 
-![img](16701032-f8547d110ba34135.png)
+![16701032-f8547d110ba34135](https://user-images.githubusercontent.com/69784547/205273518-60de850e-449f-4d00-8e94-5d1f2aed3a3c.png)
 
 **innodb_flush_log_at_trx_commit**
 
@@ -2225,8 +2220,7 @@ INSERT INTO t4(content1, content2) VALUES(CONCAT('t4_',FLOOR(1+RAND()*1000)), CO
 ```sql
 EXPLAIN SELECT * FROM t1;
 ```
-
-![image-20220710101402666](image-20220710101402666.png)
+![image-20220710101402666](https://user-images.githubusercontent.com/69784547/205273575-3d311ec4-294d-4dce-ba0a-2cabc2d6f339.png)
 
 
 
@@ -2238,7 +2232,7 @@ EXPLAIN SELECT * FROM t1;
 EXPLAIN SELECT * FROM t1 INNER JOIN t2;
 ```
 
-![image-20220711122444380](image-20220711122444380.png)
+![image-20220711122444380](https://user-images.githubusercontent.com/69784547/205273602-f51d2205-193f-408e-aab5-ca5585253365.png)
 
 
 
@@ -2253,8 +2247,7 @@ EXPLAIN SELECT * FROM t1 INNER JOIN t2;
 ```sql
 EXPLAIN SELECT * FROM t1, t2, t3;
 ```
-
-![image-20220710000757241](image-20220710000757241.png)
+![image-20220710000757241](https://user-images.githubusercontent.com/69784547/205273628-1c83f5cb-241c-4262-85ea-9ec57970bd97.png)
 
 
 
@@ -2268,7 +2261,7 @@ EXPLAIN SELECT t1.id FROM t1 WHERE t1.id =(
 );
 ```
 
-![image-20220710000950098](image-20220710000950098.png)
+![image-20220710000950098](https://user-images.githubusercontent.com/69784547/205273654-6d3d2560-4333-4211-97da-fec060c390e1.png)
 
 `注意：`查询优化器可能对涉及子查询的语句进行优化，`转为连接查询`
 
@@ -2276,7 +2269,7 @@ EXPLAIN SELECT t1.id FROM t1 WHERE t1.id =(
 EXPLAIN SELECT * FROM t1 WHERE content IN (SELECT content FROM t2 WHERE content = 'a');
 ```
 
-![image-20220711123408605](image-20220711123408605.png)
+![image-20220711123408605](https://user-images.githubusercontent.com/69784547/205273699-3ba7f56b-a676-4ef6-a201-ed4461eab0ce.png)
 
 
 
@@ -2286,7 +2279,7 @@ EXPLAIN SELECT * FROM t1 WHERE content IN (SELECT content FROM t2 WHERE content 
 EXPLAIN SELECT * FROM t1 UNION SELECT * FROM t2;
 ```
 
-![image-20220710001512891](image-20220710001512891.png)
+![image-20220710001512891](https://user-images.githubusercontent.com/69784547/205273729-5b874039-2fc8-4f88-9307-8a8d300e2edd.png)
 
 
 
@@ -2310,7 +2303,7 @@ EXPLAIN SELECT * FROM t1 UNION SELECT * FROM t2;
 EXPLAIN SELECT * FROM t1;
 ```
 
-![image-20220710001930811](image-20220710001930811.png)
+![image-20220710001930811](https://user-images.githubusercontent.com/69784547/205273750-997ff077-95a4-43a6-be2f-ed0bc9304898.png)
 
 
 
@@ -2321,7 +2314,7 @@ EXPLAIN SELECT * FROM t1;
 EXPLAIN SELECT * FROM t3 WHERE id = ( SELECT id FROM t2 WHERE content= 'a');
 ```
 
-![image-20220710002145309](image-20220710002145309.png)
+![image-20220710002145309](https://user-images.githubusercontent.com/69784547/205273784-b968f097-b6a9-43fb-a0e2-fd97cb797b33.png)
 
 
 
@@ -2331,7 +2324,7 @@ EXPLAIN SELECT * FROM t3 WHERE id = ( SELECT id FROM t2 WHERE content= 'a');
 EXPLAIN SELECT * FROM t3 WHERE id = ( SELECT id FROM t2 WHERE content = t3.content);
 ```
 
-![image-20220710002444782](image-20220710002444782.png)
+![image-20220710002444782](https://user-images.githubusercontent.com/69784547/205273809-fb873f30-d75b-469a-b205-78b0dfdddb5b.png)
 
 
 
@@ -2342,7 +2335,7 @@ EXPLAIN SELECT * FROM t3
 WHERE id = ( SELECT id FROM t2 WHERE content = @@character_set_server);
 ```
 
-![image-20220710002604613](image-20220710002604613.png)
+![image-20220710002604613](https://user-images.githubusercontent.com/69784547/205273878-c4097703-452c-45b9-a490-823a6da00f6b.png)
 
 
 
@@ -2356,7 +2349,7 @@ UNION
 SELECT * FROM t2 WHERE id = 1;
 ```
 
-![image-20220710003049587](image-20220710003049587.png)
+![image-20220710003049587](https://user-images.githubusercontent.com/69784547/205273955-bad5eb3e-aefd-4385-a68e-3d05490fe8e6.png)
 
 
 
@@ -2371,7 +2364,8 @@ SELECT * FROM t2 WHERE id = 1;
  );
 ```
 
-![image-20220710110732730](image-20220710110732730.png)
+![image-20220710110732730](https://user-images.githubusercontent.com/69784547/205274004-197a7ae8-ae17-407c-9124-f772a06db3a6.png)
+
 
 
 
@@ -2385,7 +2379,7 @@ EXPLAIN SELECT * FROM (
 
 这里的`<derived2>`就是在id为2的查询中产生的派生表。
 
-![image-20220710153504037](image-20220710153504037.png)
+![image-20220710153504037](https://user-images.githubusercontent.com/69784547/205274048-c27daf6b-9453-4290-8914-471eee45d51d.png)
 
 
 
@@ -2395,7 +2389,7 @@ EXPLAIN SELECT * FROM (
 EXPLAIN SELECT * FROM (SELECT * FROM t1 WHERE content = 't1_832') AS derived_t1;
 ```
 
-![image-20220710153921679](image-20220710153921679.png)
+![image-20220710153921679](https://user-images.githubusercontent.com/69784547/205274087-f462eef8-b147-46d6-953c-5767ff8bd4d2.png)
 
 
 
@@ -2405,7 +2399,7 @@ EXPLAIN SELECT * FROM (SELECT * FROM t1 WHERE content = 't1_832') AS derived_t1;
  EXPLAIN SELECT * FROM t1 WHERE content IN (SELECT content FROM t2);
 ```
 
-![image-20220710155650935](image-20220710155650935.png)
+![image-20220710155650935](https://user-images.githubusercontent.com/69784547/205274119-fe6823fe-4c2e-4350-a22b-df11faf863b0.png)
 
 
 
@@ -2436,7 +2430,7 @@ EXPLAIN SELECT * FROM (SELECT * FROM t1 WHERE content = 't1_832') AS derived_t1;
 EXPLAIN SELECT * FROM t1;
 ```
 
-![image-20220712065946659](image-20220712065946659.png)
+![image-20220712065946659](https://user-images.githubusercontent.com/69784547/205274171-c9e75180-db31-4ef0-babe-2abf109e0175.png)
 
 
 
@@ -2448,15 +2442,13 @@ EXPLAIN SELECT * FROM t1;
 -- 只需要读取聚簇索引部分的非叶子节点，就可以得到id的值，不需要查询叶子节点
 EXPLAIN SELECT id FROM t1;
 ```
-
-![image-20220712065815768](image-20220712065815768.png)
-
+![image-20220712065815768](https://user-images.githubusercontent.com/69784547/205274197-3cdf392f-ce6a-41c7-97d4-ca4e5cb27121.png)
 ```sql
 -- 只需要读取二级索引，就可以在二级索引中获取到想要的数据，不需要再根据叶子节点中的id做回表操作
 EXPLAIN SELECT id, deptId FROM t_emp;
 ```
 
-![image-20220712065922882](image-20220712065922882.png)
+![image-20220712065922882](https://user-images.githubusercontent.com/69784547/205274222-6abffa26-0763-4386-9435-41f22cafb797.png)
 
 
 
@@ -2465,8 +2457,7 @@ EXPLAIN SELECT id, deptId FROM t_emp;
 ```sql
 EXPLAIN SELECT * FROM t1 WHERE id IN (1, 2, 3);
 ```
-
-![image-20220712070042666](image-20220712070042666.png)
+![image-20220712070042666](https://user-images.githubusercontent.com/69784547/205274256-ebe474b2-a9ad-494c-af7f-4d67cc5c5ec0.png)
 
 
 
@@ -2476,7 +2467,7 @@ EXPLAIN SELECT * FROM t1 WHERE id IN (1, 2, 3);
 EXPLAIN SELECT * FROM t_emp WHERE deptId = 1;
 ```
 
-![image-20220712070727963](image-20220712070727963.png)
+![image-20220712070727963](https://user-images.githubusercontent.com/69784547/205274289-3c94165c-2500-4edb-9e37-930995003211.png)
 
 
 
@@ -2486,7 +2477,7 @@ EXPLAIN SELECT * FROM t_emp WHERE deptId = 1;
 EXPLAIN SELECT * FROM t1, t2 WHERE t1.id = t2.id;
 ```
 
-![image-20220712070851089](image-20220712070851089.png)
+![image-20220712070851089](https://user-images.githubusercontent.com/69784547/205274332-e007699a-a11e-4408-a3e3-64c27fbb6f08.png)
 
 
 
@@ -2495,8 +2486,7 @@ EXPLAIN SELECT * FROM t1, t2 WHERE t1.id = t2.id;
 ```sql
 EXPLAIN SELECT * FROM t1 WHERE id = 1;
 ```
-
-![image-20220712070944090](image-20220712070944090.png)
+![image-20220712070944090](https://user-images.githubusercontent.com/69784547/205274367-43fd1078-3ec2-4c0a-912f-0576ec0292b9.png)
 
 
 
@@ -2508,7 +2498,7 @@ INSERT INTO t VALUES(1);
 EXPLAIN SELECT * FROM t;
 ```
 
-![image-20220711125730163](image-20220711125730163.png)
+![image-20220711125730163](https://user-images.githubusercontent.com/69784547/205274406-5461ec3e-ff16-4746-87e4-7b61277d40b9.png)
 
 
 
@@ -2520,7 +2510,7 @@ EXPLAIN SELECT * FROM t;
 EXPLAIN SELECT * FROM t1 WHERE content IN (SELECT content1 FROM t4 WHERE t1.content = t4.content2) OR content = 'a';
 ```
 
-![image-20220712071057817](image-20220712071057817.png)
+![image-20220712071057817](https://user-images.githubusercontent.com/69784547/205274448-e0b6ea36-fbe5-443a-af15-ca143b3db04a.png)
 
 
 
@@ -2529,8 +2519,7 @@ EXPLAIN SELECT * FROM t1 WHERE content IN (SELECT content1 FROM t4 WHERE t1.cont
 ```sql
 EXPLAIN SELECT * FROM t1 WHERE id IN (SELECT id FROM t2 WHERE t1.content = t2.content) OR content = 'a';
 ```
-
-![image-20220712071138320](image-20220712071138320.png)
+![image-20220712071138320](https://user-images.githubusercontent.com/69784547/205274482-7aca652f-4f86-4214-ad5f-c46f6dfd54f6.png)
 
 
 
@@ -2540,7 +2529,7 @@ EXPLAIN SELECT * FROM t1 WHERE id IN (SELECT id FROM t2 WHERE t1.content = t2.co
 EXPLAIN SELECT * FROM t_emp WHERE deptId = 1 OR id = 1;
 ```
 
-![image-20220711132125501](image-20220711132125501.png)
+![image-20220711132125501](https://user-images.githubusercontent.com/69784547/205274517-27c96617-cf81-4f3f-82e0-838b073a4f6d.png)
 
 
 
@@ -2550,7 +2539,7 @@ EXPLAIN SELECT * FROM t_emp WHERE deptId = 1 OR id = 1;
 EXPLAIN SELECT * FROM t_emp WHERE deptId = 1 OR deptId IS NULL;
 ```
 
-![image-20220711131831315](image-20220711131831315.png)
+![image-20220711131831315](https://user-images.githubusercontent.com/69784547/205274560-79519c19-135f-480e-8b1c-82ba18e4a02b.png)
 
 
 
@@ -2568,7 +2557,7 @@ EXPLAIN SELECT * FROM t_emp WHERE deptId = 1 OR deptId IS NULL;
 EXPLAIN SELECT id FROM t1 WHERE id = 1;
 ```
 
-![image-20220710142152514](image-20220710142152514.png)
+![image-20220710142152514](https://user-images.githubusercontent.com/69784547/205274589-c8f05285-86da-4957-9393-f4ad9074faf0.png)
 
 
 
@@ -2592,7 +2581,7 @@ EXPLAIN SELECT * FROM t_emp WHERE age = 30 AND `name` = 'ab%';
 EXPLAIN SELECT * FROM t_emp WHERE age = 30;
 ```
 
-![image-20220710130548971](image-20220710130548971.png)
+![image-20220710130548971](https://user-images.githubusercontent.com/69784547/205274623-62fc7d57-fe4e-4bde-b337-67cafbb5ba02.png)
 
 
 
@@ -2608,7 +2597,7 @@ EXPLAIN SELECT * FROM t1, t2 WHERE t1.id = t2.id;
 EXPLAIN SELECT * FROM t_emp WHERE age = 30;
 ```
 
-![image-20220709211819944](image-20220709211819944.png)
+![image-20220709211819944](https://user-images.githubusercontent.com/69784547/205274650-1d7746fb-b480-4c45-a1be-4c366258a4a4.png)
 
 
 
@@ -2624,7 +2613,7 @@ EXPLAIN SELECT * FROM t_emp WHERE empno = '10001';
 EXPLAIN SELECT * FROM t_emp WHERE deptId = 1;
 ```
 
-![image-20220710131916240](image-20220710131916240.png)
+![image-20220710131916240](https://user-images.githubusercontent.com/69784547/205274701-4f53d57d-da12-478d-9e29-412175388c59.png)
 
 
 
@@ -2641,7 +2630,7 @@ EXPLAIN SELECT * FROM t_emp WHERE deptId = 1;
 EXPLAIN SELECT * FROM t_emp WHERE `name` = '风清扬';
 ```
 
-![image-20220709212722601](image-20220709212722601.png)
+![image-20220709212722601](https://user-images.githubusercontent.com/69784547/205274743-8128ac7f-d919-43f4-a31b-21c94cf2376f.png)
 
 
 
@@ -2657,7 +2646,7 @@ EXPLAIN SELECT * FROM t_emp WHERE `name` = '风清扬';
 EXPLAIN SELECT * FROM t_emp WHERE 1 != 1;
 ```
 
-![image-20220709231638201](image-20220709231638201.png)
+![image-20220709231638201](https://user-images.githubusercontent.com/69784547/205274772-c4f42f15-4372-4403-ba1b-aaaa02881681.png)
 
 
 
@@ -2667,7 +2656,7 @@ EXPLAIN SELECT * FROM t_emp WHERE 1 != 1;
 EXPLAIN SELECT * FROM t_emp WHERE `name` = '风清扬';
 ```
 
-![image-20220709215122017](image-20220709215122017.png)
+![image-20220709215122017](https://user-images.githubusercontent.com/69784547/205274803-c0d0e30f-badc-4df2-a582-25e9d79926cd.png)
 
 
 
@@ -2677,7 +2666,7 @@ EXPLAIN SELECT * FROM t_emp WHERE `name` = '风清扬';
 EXPLAIN SELECT DISTINCT content FROM t1;
 ```
 
-![image-20220710181100102](image-20220710181100102.png)
+![image-20220710181100102](https://user-images.githubusercontent.com/69784547/205274842-4299ad28-5021-4915-8067-3c06c824e469.png)
 
 
 
@@ -2689,7 +2678,7 @@ EXPLAIN SELECT DISTINCT content FROM t1;
 EXPLAIN SELECT * FROM t1 ORDER BY id;
 ```
 
-![image-20220710172607190](image-20220710172607190.png)
+![image-20220710172607190](https://user-images.githubusercontent.com/69784547/205274875-8d7ae085-9666-4c49-b259-aaf4f8aea596.png)
 
 如果排序操作无法使用到索引，只能在内存中（记录较少时）或者磁盘中（记录较多时）进行排序（filesort），如下所示：
 
@@ -2697,7 +2686,7 @@ EXPLAIN SELECT * FROM t1 ORDER BY id;
 EXPLAIN SELECT * FROM t1 ORDER BY content;
 ```
 
-![image-20220710172926396](image-20220710172926396.png)
+![image-20220710172926396](https://user-images.githubusercontent.com/69784547/205274910-a0453674-a4cb-4e5e-996b-1beb64e531a7.png)
 
 
 
@@ -2706,14 +2695,12 @@ EXPLAIN SELECT * FROM t1 ORDER BY content;
 ```sql
  EXPLAIN SELECT id, content1 FROM t4;
 ```
-
-![image-20220712071716131](image-20220712071716131.png)
+![image-20220712071716131](https://user-images.githubusercontent.com/69784547/205274942-1c9b153d-23bc-47dc-a96b-356ea70b0b3f.png)
 
 ```sql
 EXPLAIN SELECT id FROM t1;
 ```
-
-![image-20220712072055566](image-20220712072055566.png)
+![image-20220712072055566](https://user-images.githubusercontent.com/69784547/205274980-28318f24-4c87-496a-abde-6c7d8365de4b.png)
 
 
 
@@ -2726,11 +2713,11 @@ EXPLAIN SELECT id FROM t1;
 EXPLAIN SELECT * FROM t4 WHERE content1 > 'z' AND content1 LIKE '%a';
 ```
 
-![image-20220710180257692](image-20220710180257692.png)
+![image-20220710180257692](https://user-images.githubusercontent.com/69784547/205275026-13122cd9-b10e-4f6e-9cbc-1b3a58438272.png)
 
 **注意：**如果这里的查询条件`只有content1 > 'z'`，那么找到满足条件的索引后也会进行一次索引下推的操作，判断content1 > 'z'是否成立（这是源码中为了编程方便做的冗余判断）
 
-![image-20220712012108900](image-20220712012108900.png)
+![image-20220712012108900](https://user-images.githubusercontent.com/69784547/205275059-dbd16503-f919-4ab1-a3ca-47963ed3c93e.png)
 
 
 
@@ -2740,15 +2727,14 @@ EXPLAIN SELECT * FROM t4 WHERE content1 > 'z' AND content1 LIKE '%a';
 EXPLAIN  SELECT * FROM t1, t2 WHERE t1.content = t2.content;
 ```
 
-![image-20220710182356817](image-20220710182356817.png)
+![image-20220710182356817](https://user-images.githubusercontent.com/69784547/205275087-7c337a6c-c9ff-4937-b1fa-fc8e0458ddbf.png)
 
 下面这个例子就是被驱动表使用了索引：
 
 ```sql
 EXPLAIN SELECT * FROM t_emp, t_dept WHERE t_dept.id = t_emp.deptId;
 ```
-
-![image-20220710182524371](image-20220710182524371.png)
+![image-20220710182524371](https://user-images.githubusercontent.com/69784547/205275120-6a05a36c-f182-483f-980d-f5c0970dada4.png)
 
 
 
@@ -2793,7 +2779,7 @@ EXPLAIN SELECT * FROM t_emp, t_dept WHERE t_dept.id = t_emp.deptId;
 
 使用pref 工具分析哪些函数引发的cpu过高来追踪定位
 
-![image-20221106160437906](image-20221106160437906.png)
+![image-20221106160437906](https://user-images.githubusercontent.com/69784547/205275157-0e12b730-9ba1-43b2-b146-095db114cd50.png)
 
 
 
@@ -2805,7 +2791,7 @@ EXPLAIN SELECT * FROM t_emp, t_dept WHERE t_dept.id = t_emp.deptId;
 
 一个数据库由很多表的构成，每个表对应着**不同的业务**，垂直切分是指按照业务将表进行分类，分布到不同 的数据库上面，这样也就将数据或者说压力分担到不同的库上面，如下图：       
 
-​                ![](111.jpg)   
+![111](https://user-images.githubusercontent.com/69784547/205275252-456b6ccc-56b5-4013-9a49-8b92a9e22791.jpg)
 
 系统被切分成了，用户，订单交易，支付几个模块。
 
@@ -2815,7 +2801,7 @@ EXPLAIN SELECT * FROM t_emp, t_dept WHERE t_dept.id = t_emp.deptId;
 
 相对于垂直拆分，水平拆分不是将表做分类，而是按照某个字段的某种规则来分散到多个库之中，每个表中包含一部分数据。简单来说，我们可以将数据的水平切分理解为是按照数据行的切分，就是将表中的某些行切分 到一个数据库，而另外的某些行又切分到其他的数据库中，如图： 
 
-![](222.jpg)
+![222](https://user-images.githubusercontent.com/69784547/205275264-5f7e6888-b621-4ea6-aa59-e19cc91452f2.jpg)
 
 
 
@@ -2836,8 +2822,7 @@ EXPLAIN SELECT * FROM t_emp, t_dept WHERE t_dept.id = t_emp.deptId;
 2. 基于本地aop实现，拦截sql，改写，路由和结果归集处理。
 
 #### 138 	用过哪些分库分表工具？
-
-![img](25723371_16499183725J8d.png)
+![25723371_16499183725J8d](https://user-images.githubusercontent.com/69784547/205275294-3252e560-9597-4325-ad8a-0f72b34d983c.png)
 
 #### 139 	分库分表后可能会有哪些问题？
 
@@ -2851,9 +2836,9 @@ EXPLAIN SELECT * FROM t_emp, t_dept WHERE t_dept.id = t_emp.deptId;
 
 #### 140 	说一下读写分离常见方案？
 
-![image-20221106171251532](image-20221106171251532.png)
+![image-20221106171251532](https://user-images.githubusercontent.com/69784547/205275330-348ba8f0-6171-4c8a-b8f4-e42bb4a11afe.png)
 
-![image-20221106171945037](image-20221106171945037.png)
+![image-20221106171945037](https://user-images.githubusercontent.com/69784547/205275367-ad83cb48-69c5-4b78-b786-ad743c40b74d.png)
 
 
 
